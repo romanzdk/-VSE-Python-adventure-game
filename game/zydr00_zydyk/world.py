@@ -34,8 +34,10 @@ class Named():
         return self._name
     
     def __str__(self):
-        return self._name
-
+        return self.name
+    def __repr__(self):
+        return '»' + self.name + '«'
+        # f'{self.__class__.__name__}:{self.name}'
 
 ############################################################################
 
@@ -43,16 +45,39 @@ class Item(Named):
     """Instance představují h-objekty v prostorech či batohu.
     """
 
-    def __init__(self, name:str, **args):
+    def __init__(self, name:str, is_pickable:int,
+                 description:str, item_names_to_unhide:tuple[str], **args):
         """Vytvoří h-objekt se zadaným názvem.
         """
         super().__init__(name, **args)
+        self._is_pickable = is_pickable
+        self._description = description
+        self._item_names_to_unhide = item_names_to_unhide
+    
+    def initialize(self):
+        """Inicializuje prostor na počátku hry,
+        tj. nastaví počáteční sadu sousedů a objektů v prostoru.
+        """
+        names = self._item_names_to_unhide
+        self._items_to_unhide = [item(i) for i in names]
 
     @property
-    def weight(self) -> int:
+    def is_pickable(self) -> bool:
         """Vrátí váhu daného objektu.
         """
-        return self.weight
+        return self._is_pickable
+    
+    @property
+    def description(self) -> str:
+        """Vrátí stručný popis daného predmetu.
+        """
+        return self._description
+    
+    @property
+    def items_to_unhide(self):
+        """Vrátí stručný popis daného predmetu.
+        """
+        return self._items_to_unhide
 
 ############################################################################
 
@@ -77,7 +102,7 @@ class ItemContainer():
         a jeho název na pozicích se stejným indexem.
         """
         self._item_names = [n.lower() for n in self._initial_item_names]
-        self._items      = [Item(n)   for n in self._initial_item_names]
+        self._items      = [item(n)   for n in self._initial_item_names]
 
 
     @property
@@ -142,7 +167,7 @@ class _Bag(ItemContainer):
         inicializuje i informaci o zbývající kapacitě.
         """
         super().initialize()
-        self.CAPACITY = 2
+        self.CAPACITY = 3
 
 
     @property
@@ -153,11 +178,15 @@ class _Bag(ItemContainer):
     
     @property
     def items(self) -> list[Item]:
-        return [Item(i) for i in self._initial_item_names]
+        return [item(i) for i in self._initial_item_names]
 
     @items.setter
     def items(self, value) -> None:
         self._items = value
+    
+    @property
+    def free(self) -> int:
+        return self.CAPACITY - len(self._items)
     
 
 ############################################################################
@@ -189,7 +218,7 @@ class Place(ItemContainer, Named):
         """
         super().initialize()
         self._neighbors = [place(n) for n in self.initial_neighbor_names]
-        self._items = [Item(i) for i in self._initial_item_names]
+        self._items = [item(i) for i in self._initial_item_names]
 
 
     @property
@@ -214,7 +243,7 @@ class Place(ItemContainer, Named):
     
     @property
     def items(self) -> list[Item]:
-        return tuple(self._items)
+        return self._items
     
     @items.setter
     def items(self, value):
@@ -228,8 +257,12 @@ def initialize():
         propojení jednotlivých prostorů a jejich výchozí obsah,
         nastaví výchozí aktuální prostor a inicializuje batoh.
     """
-    global _current_place, _PLACES, BAG
+    global _current_place
     
+    # inicializuj vsechny predmety
+    for item in _ITEMS:
+        item.initialize()
+
     # inicializuj vsechny prostory
     for place in _PLACES:
         place.initialize()
@@ -245,7 +278,6 @@ def current_place() -> Place:
     """Vrátí odkaz na aktuální prostor,
     tj. na prostor, v němž se hráč pravé nachází.
     """
-    global _current_place
     return _current_place
 
 
@@ -262,8 +294,37 @@ def place(name:str) -> Place:
     """
     return _NAME_2_PLACE.get(name)
 
+def item(name:str) -> Item:
+    return _NAME_2_ITEM.get(name)
+
 
 ############################################################################
+
+_ITEMS = (
+    Item('helikoptera', 
+    False,
+    'Nasli jste tyto veci: mobil, mapu, flash disk a naradi.',
+    ('mobil', 'mapa', 'flash_disk','naradi',)),
+    Item('mobil', 
+    True,
+    'Telefon je bohuzel rozbity a tak je k nicemu.',
+    ()),
+    Item('kompas',True,
+    'Funkcni kompas.',
+    ()),
+    Item('mapa',True,
+    'Na mape vidite nacrtnutou lebku v lese a majak. Zbytek mapy je ohorely.',
+    ()),
+    Item('flash_disk',True,
+    'Obycejna flashka. Jeji obsah bohuzel nejste schopni zjistit.',
+    ()),
+    Item('naradi',False,
+    'Naradi je zaklineno pod troskami helikoptery.',
+    ()),
+)
+
+_NAME_2_ITEM = {n.name.lower():n for n in _ITEMS}
+
 
 _PLACES = (
     Place('pole',
@@ -322,4 +383,4 @@ BAG = _Bag(('kompas',))
 
 
 ############################################################################
-dbg.stop_mod (0, __name__)
+# dbg.stop_mod (0, __name__)

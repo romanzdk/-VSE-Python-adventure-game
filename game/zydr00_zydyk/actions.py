@@ -64,6 +64,28 @@ class End(AAction):
 
 ############################################################################
 
+class Explore(AAction):
+    """Prozkouma zvoleny objekt"""
+
+    def __init__(self):
+        super().__init__('prozkoumej', 'Prozkouma zvoleny objekt')
+    
+    def execute(self, arguments:tuple[str]) -> str:
+        if len(arguments) < 2:
+            return ('Nevim co mam prozkoumat, zadejte argument.')
+        item_name = arguments[1]
+        item=world.item(item_name) #vytvor z nazvu objekt
+        if item in current_place().items: #najdi objekt v prostoru
+            items_in_place = current_place().items
+            current_place().items = (list(items_in_place)
+                                     +(item.items_to_unhide))
+            return (f'Prozkoumali jste: {item_name}.\n'+
+                    item.description)
+        else:
+            return f'Zadaný objekt v prostoru není: {item_name}'
+
+############################################################################
+
 class Go_To(AAction):
     """Resi presun hrace do zadaneho prostoru"""
 
@@ -84,6 +106,29 @@ class Go_To(AAction):
 
 ############################################################################
 
+class Help(AAction):
+    """Napoveda pro hrace"""
+
+    def __init__(self):
+        super().__init__('?', 'Zobrazi napovedu')
+    
+    def execute(self, arguments:tuple[str]) -> str:
+        return (
+        'Tvým úkolem je zachránit se - dostat se z tohoto místa\n'
+        'Můžeš zadat tyto příkazy:\n'
+        'jdi <misto>\n'
+        'vezmi <predmet>\n'
+        'poloz <predmet>\n'
+        'prozkoumej <predmet>\n'
+        'pouzij <predmet1> <predmet2>\n'
+        'zakric\n'
+        'brec\n'
+        'konec\n'
+        '?'
+        )
+
+############################################################################
+
 class Put_Down(AAction):
     """Resi presun predmetu z batohu do prostoru"""
 
@@ -99,7 +144,7 @@ class Put_Down(AAction):
         if not item:
             return f'Zadaný objekt v batohu není: {item_name}'
         current_place().add_item(item)
-        return f'Vyhodili jste {item.name}.'
+        return f'Vyhodili jste: {item.name}.'
 
 ############################################################################
 
@@ -116,11 +161,22 @@ class Take(AAction):
             return ('Nevím, co mám zvednout.\n'
                    'Je třeba zadat jméno zvedaného objektu.')
         item_name = arguments[1]
-        item = current_place().remove_item(item_name)
-        if not item:
+        item=world.item(item_name) #vytvor z nazvu objekt
+        if item in current_place().items: #najdi objekt v prostoru
+            if (BAG.free >= 1) and (item.is_pickable):
+                current_place().remove_item(item_name)
+                BAG.add_item(item)
+                return (f'Sebrali jste: {item.name}.\n' +
+                        item.description)
+            else:
+                if BAG.free < 1:
+                    return 'Zadaný objekt se už do batohu nevejde!'
+                else:
+                    return f'Zadaný objekt není možno zvednout: {item_name}'
+        else:
             return f'Zadaný objekt v prostoru není: {item_name}'
-        BAG.add_item(item)
-        return f'Sebrali jste {item.name}.'
+        
+        
 
 
 ############################################################################
@@ -153,7 +209,7 @@ def execute_command(command:str) -> str:
         else:
             return ('Prvním příkazem není startovací příkaz.\n' 
                     'Hru, která neběží, lze spustit '
-                    'pouze startovacím příkazem.\n')
+                    'pouze startovacím příkazem.')
 
 ############################################################################
 
@@ -185,7 +241,9 @@ _NAME_2_ACTION = {
     'jdi':Go_To(),
     'konec':End(),
     'poloz':Put_Down(),
-    'vezmi':Take()
+    'prozkoumej':Explore(),
+    'vezmi':Take(),
+    '?':Help()
 }
 
 ############################################################################
