@@ -8,7 +8,9 @@ dbg.start_mod(0, __name__)
 ############################################################################
 
 from ..api.game_types import *
+
 from . import actions, world as wrld
+
 
 ############################################################################
 
@@ -19,37 +21,48 @@ def isAlive() -> bool:
     """
     return actions.is_active()
 
+
 def all_actions() -> tuple[AAction]:
     """Vrátí n-tici všech akcí použitelných ve hře.
     """
     return tuple(actions._NAME_2_ACTION.values())
 
+
 def basic_actions() -> BasicActions:
     """Vrátí přepravku s názvy povinných akcí.
     """
-    return BasicActions('jdi', 'poloz', 'vezmi' ,'?', 'konec') 
+    return BasicActions(MOVE_NAME='Jdi', PUT_DOWN_NAME='Polož',
+                        TAKE_NAME='Vezmi', HELP_NAME='?', END_NAME='KONEC')
+
 
 def bag() -> ABag:
     """Vrátí odkaz na batoh, do nějž bude hráč ukládat sebrané objekty.
     """
     return wrld.BAG
 
+
 def world() -> AWorld:
     """Vrátí odkaz na svět hry.
     """
     return wrld
+
 
 def execute_command(command:str) -> str:
     """Zpracuje zadaný příkaz a vrátí text zprávy pro uživatele.
     """
     return actions.execute_command(command)
 
-def stop() -> None:
+
+def stop():
     """Ukončí hru a uvolní alokované prostředky.
     Zadáním prázdného příkazu lze následně spustit hru znovu.
     """
     actions.stop()
+
+
+
 ############################################################################
+
 
 
 ############################################################################

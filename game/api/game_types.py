@@ -81,6 +81,11 @@ class ANamed(ABC):
         """
 
 
+    def __str__(self) -> str:
+        """Vrátí uživatelský textový podpis jako název dané instance.
+        """
+
+
 
 ############################################################################
 
@@ -116,7 +121,7 @@ class AItemContainer(ABC):
 
 
     @abstractmethod
-    def initialize(self):
+    def initialize(self) -> None:
         """Inicializuje kontejner na počátku hry.
         Po inicializace bude obsahovat příslušnou výchozí sadu objektů.
         Protože se názvy objektů mohou opakovat, nemůže použít slovník.
@@ -148,9 +153,9 @@ class AItemContainer(ABC):
 
 
     @abstractmethod
-    def remove_item(self, item_name:str) -> bool:
-        """Pokusí se odebrat objekt se zadaným názvem z kontejneru
-        a vrátí informaci o tom, jestli se to podařilo.
+    def remove_item(self, item_name:str) -> AItem:
+        """Pokusí se odebrat objekt se zadaným názvem z kontejneru.
+        Vrátí odkaz na zadaný objekt nebo None.
         """
 
 
@@ -165,12 +170,12 @@ class ABag(AItemContainer):
     součet vah objektů vyskytujících se v úložišti.
     """
 
-    def __init__(self, initial_item_names:tuple[str], **args):
-        super().__init__(initial_item_names=initial_item_names, **args)
+    def __init__(self, initial_item_names:tuple[str]):
+        super().__init__(initial_item_names=initial_item_names)
 
 
     @abstractmethod
-    def initialize(self):
+    def initialize(self) -> None:
         """Inicializuje batoh na počátku hry. Vedle inicializace obsahu
         inicializuje i informaci o zbývající kapacitě.
         """
@@ -199,14 +204,13 @@ class APlace(AItemContainer, ANamed):
 
     def __init__(self, name:str, description:str,
                  initial_neighbor_names:tuple[str],
-                 initial_item_names    :tuple[str], **args
+                 initial_item_names    :tuple[str]
         ):
-        super().__init__(name=name, initial_item_names=initial_item_names,
-                         **args)
+        super().__init__(name=name, initial_item_names=initial_item_names)
 
 
     @abstractmethod
-    def initialize(self):
+    def initialize(self) -> None:
         """Inicializuje prostor na počátku hry,
         tj. nastaví počáteční sadu sousedů a objektů v prostoru.
         """
@@ -241,7 +245,7 @@ class AWorld(ABC):
     """
 
     @abstractmethod
-    def initialize(self):
+    def initialize(self) -> None:
         """Inicializuje svět hry, tj. nastavuje vzájemné počáteční
         propojení jednotlivých prostorů a jejich výchozí obsah,
         nastaví výchozí aktuální prostor a inicializuje batoh.
@@ -350,10 +354,23 @@ class AGame(ABC):
         """
 
     @abstractmethod
-    def stop(self):
+    def stop(self) -> None:
         """Ukončí hru a uvolní alokované prostředky.
         Zadáním prázdného příkazu lze následně spustit hru znovu.
         """
+
+
+    def current_state(self) -> str:
+        """Vrátí string s popisem aktuálního stavu, tj. s názvem
+        aktuálního prostoru, jeho sousedů a h-objektů a obsahu batohu.
+        """
+        cp = self.world().current_place()
+        result = (f'Aktuální prostor:    {cp}\n'
+                  f'Sousedé prostoru:    {cp.neighbors}\n'
+                  f'Předměty v prostoru: {cp.items}\n'
+                  f'Předměty v batohu:   {self.bag().items}')
+        return result
+
 
 
 

@@ -10,6 +10,7 @@ Moduly:
                   Mají hlavně definovat požadované atributy
     scen_types  - Typy scénářů a jejich kroků
     scenarios   - Třídy kroků scénáře a scénářů
+    gui         - Grafické uživatelské rozhraní pro hry dodržující api
 
 """
 import dbg

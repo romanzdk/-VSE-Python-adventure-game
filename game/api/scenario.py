@@ -15,7 +15,7 @@ dbg.start_mod(0, __name__)
 
 from collections import namedtuple
 
-from .scen_types import TypeOfScenario, TypeOfStep
+from .scen_types import TypeOfScenario, TypeOfStep, tsNOT_START
 from .game_types import AGame
 
 
@@ -73,6 +73,7 @@ class Scenario:
     """Třída scénářů definujících požadované chování hry.
     """
     count = 0
+    print_state = False     # Zda při testu průběžně zobrazovat stav
 
     def __init__(self, name:str, scenario_type:TypeOfScenario,
                  steps:tuple['ScenarioStep']):
@@ -134,8 +135,12 @@ class Scenario:
               f'Stiskněte Enter')
 
 
-    def test(self, game:AGame):
-        """Otestuje zadanou hru podle zadaného scénáře.
+    def test(self, game:AGame, conv=None):
+        """Otestuje zadanou hru podle daného scénáře.
+        Je-li argument »conv« roven +1, převádí se zadané příkazy
+        na velká písmena, je-li roven -1, převádí se na malá písmena
+        a má-li jinou hodnotu nebo není zadá, ponechávají se příkazy
+        ve tvaru, jak byly zadány ve scénáři.
         """
         from_scenario:list[str]
         from_game:list[str]
@@ -143,44 +148,60 @@ class Scenario:
         def _error(reason:str, step:ScenarioStep, expected, obtained):
             """Zobrazí chybové hlášení upozorňující na příčinu chyby.
             """
-            message = (f'Chybný stav objektu: {reason}\n'
-                       f'Očekávaný objekt:    {str(expected)}\n'
-                       f'Obdržený objekt:     {str(obtained)}\n\n'
-                       f'Chyba nastala při vyhodnocování kroku:\n{step}')
+            message = (f'Při vyhodnocování {step.index}. kroku scénáře '
+                         f'{self.name} byla odhalena chyba:\n'
+                       f'Chybným objekt:   {reason}\n'
+                       f'Očekávaný objekt: {str(expected)}\n'
+                       f'Obdržený objekt:  {str(obtained)}\n\n')
             print(message)
-            print('\nStav hry po provedení predchoziho příkazu:')
-            print()
-            # print(f'Prostor: {(cp:=game.world().current_place().name)}\n'
-            #         f'Sousede:             {cp.nei}\n'
-            #         f'Obdržený objekt:     {str(obtained)}\n\n'
-            #         f'Chyba nastala při vyhodnocování kroku:\n{step}')
+            print(f'Očekávaný stav hry po provedení testovaného příkazu:\n'
+                  f'{step}')
+            print(f'\nObdržený stav hry po provedení testovaného příkazu:')
+            print(f'{AGame.current_state(game)}')
             raise Exception
 
         def compare_containers(scen_cont, game_cont):
             """Porovná obsah zadaných kontejnerů bez ohledu na velikost písmen.
             """
-            dbg.prSE(2, 1, 'test_by', f'{scen_cont=}, {game_cont=}')
+            # dbg.prSE(2, 1, 'test_by', f'{scen_cont=}, {game_cont=}')
             if not ('__iter__' in dir(game_cont)):
                 _error('objekt hry není kontejner', step, scen_cont, game_cont)
             nonlocal from_scenario, from_game
             from_scenario = [item     .lower() for item in scen_cont].sort()
             from_game     = [item.name.lower() for item in game_cont].sort()
-            dbg.prSE(2, 0, 'test_by')
+            # dbg.prSE(2, 0, 'test_by')
             return from_scenario != from_game
 
+        print(f'\n{60*"%"}\nTest podle scénáře: {self.name} - {conv=}\n')
         step:ScenarioStep
         for step in self.steps:
-            print(f'{step.index}. {(command:=step.command)}\n{30*"-"}')
+            command = step.command
+            if   conv == +1:  command = command.upper()
+            elif conv == -1:  command = command.lower()
+            print(f'{step.index}. {command}\n{30*"-"}')
             try:
                 answer = game.execute_command(command)
-                print(f'{answer}\n{30*"="}\n')
+                print(f'{answer}')
+                if Scenario.print_state:
+                    print(f'{30*"-"}\n{AGame.current_state(game)}')
+                print(f'{30*"="}\n')
             except Exception as ex:
                 print(f'Při vykonávání příkazu '
                       f'{step.index}. {(command:=step.command)}\n'
                       f'byla vyhozena výjimka {ex}')
                 raise ex
-            if step.message != answer[:len(step.message)]:
+
+            # print(f'Očekávaný stav hry po provedení testovaného příkazu:\n'
+            #       f'{step}')
+            # print(f'\nObdržený stav hry po provedení testovaného příkazu:')
+            # print(f'{AGame.current_state(game)}')
+
+            if (not answer or
+                step.message.lower() != answer[:len(step.message)].lower()
+            ):
                 _error('odpověď hry', step, step.message, answer)
+            if step.typeOfStep == tsNOT_START:
+                continue
             current_place = game.world().current_place()
             if step.place != current_place.name:
                 _error('aktuální prostor', step, step.place, current_place)
@@ -191,6 +212,8 @@ class Scenario:
                                                              from_game)
             if compare_containers(step.bag, game.bag().items):
                 _error('objekty v batohu', step, from_scenario, from_game)
+        if game.isAlive():
+            _error('Po ukončení scénáře není hra ukončena', step, (), ())
 
 
 

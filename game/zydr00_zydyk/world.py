@@ -26,18 +26,21 @@ class Named():
         super().__init__(**args)
         self._name = name
 
-
     @property
     def name(self) -> str:
         """Vrátí název daného objektu.
         """
         return self._name
     
-    def __str__(self):
+    def __str__(self) -> str:
+        """Vrátí název daného objektu.
+        """
         return self.name
-    def __repr__(self):
+
+    def __repr__(self) -> str:
+        """Vrátí název daného objektu.
+        """
         return '»' + self.name + '«'
-        # f'{self.__class__.__name__}:{self.name}'
 
 ############################################################################
 
@@ -45,39 +48,73 @@ class Item(Named):
     """Instance představují h-objekty v prostorech či batohu.
     """
 
-    def __init__(self, name:str, is_pickable:int,
-                 description:str, item_names_to_unhide:tuple[str], **args):
+    def __init__(self, name:str, is_pickable:bool,
+                 description:str, item_names_to_unhide:tuple[str], 
+                 can_be_used_on:tuple[str], text_when_used:str, 
+                 ends_game_when_used:bool, **args):
         """Vytvoří h-objekt se zadaným názvem.
         """
         super().__init__(name, **args)
         self._is_pickable = is_pickable
         self._description = description
         self._item_names_to_unhide = item_names_to_unhide
-    
-    def initialize(self):
+        self._can_be_used_on = can_be_used_on
+        self._text_when_used = text_when_used
+        self._ends_game_when_used = ends_game_when_used
+        
+    def initialize(self) -> None:
         """Inicializuje prostor na počátku hry,
         tj. nastaví počáteční sadu sousedů a objektů v prostoru.
         """
         names = self._item_names_to_unhide
         self._items_to_unhide = [item(i) for i in names]
+        self._is_explored = False
 
     @property
     def is_pickable(self) -> bool:
-        """Vrátí váhu daného objektu.
+        """Vrátí informaci o tom, zda se dá daný předmět zvednout.
         """
         return self._is_pickable
     
     @property
     def description(self) -> str:
-        """Vrátí stručný popis daného predmetu.
+        """Vrátí stručný popis daného předmětu.
         """
         return self._description
     
     @property
-    def items_to_unhide(self):
-        """Vrátí stručný popis daného predmetu.
+    def items_to_unhide(self) -> list[AItem]:
+        """Vrátí seznam předmětů, které se v prostoru odkryjí po prozkoumání.
         """
         return self._items_to_unhide
+    
+    @property
+    def is_explored(self) -> bool:
+        """Vrátí informaci o tom, zda je daný předmět prozkoumaný.
+        """
+        return self._is_explored
+    
+    @is_explored.setter
+    def is_explored(self, value) -> None:
+        """Nastaví prozkoumanost předmětu.
+        """
+        self._is_explored = value
+    
+    @property
+    def can_be_used_on(self) -> list[AItem]:
+        """Vrátí seznam předmětů, na které lze daný předmět použít.
+        """
+        return self._can_be_used_on
+    
+    @property
+    def text_when_used(self) -> str:
+        """Vrátí popis, který se vypíše po použití daného předmětu"""
+        return self._text_when_used
+    
+    @property
+    def ends_game_when_used(self) -> bool:
+        """Vrátí informaci o tom, zda použití předmětu ukončí hru"""
+        return self._ends_game_when_used
 
 ############################################################################
 
@@ -93,7 +130,7 @@ class ItemContainer():
         self._initial_item_names = initial_item_names
 
 
-    def initialize(self):
+    def initialize(self) -> None:
         """Inicializuje kontejner na počátku hry.
         Po inicializace bude obsahovat příslušnou výchozí sadu objektů.
         Protože se názvy objektů mohou opakovat, nemůže použít slovník.
@@ -101,17 +138,21 @@ class ItemContainer():
         Musí se jen dbát na to, aby se v obou seznamech vyskytoval objekt
         a jeho název na pozicích se stejným indexem.
         """
-        self._item_names = [n.lower() for n in self._initial_item_names]
-        self._items      = [item(n)   for n in self._initial_item_names]
-
+        self._item_names = [n.lower() for n in sorted(self._initial_item_names)]
+        self._items = [item(n) for n in sorted(self._initial_item_names)]
 
     @property
-    def items(self) -> list[Item]:
+    def items(self) -> tuple[Item]:
         """Vrátí n-tici objektů v daném kontejneru.
         """
-        return self._items[:]   # Vracím kopii, aby nikdo nemohl
-                                # změnit její obsah
+        return tuple(self._items)
 
+    @property
+    def item_names(self) -> tuple[str]:
+        """Vrátí n-tici názvů objektů v daném kontejneru.
+        """
+        return tuple(self._item_names)
+    
     def item(self, name:str) -> Item:
         """Je-li v kontejneru objekt se zadaným názvem, vrátí jej,
         jinak vrátí None.
@@ -122,28 +163,23 @@ class ItemContainer():
         return None
 
 
-    def add_item(self, item:Item) -> bool:
-        """Přidá zadaný objekt do kontejneru a vrátí informaci o tom,
-        jestli se to podařilo.
+    def add_item(self, item:Item) -> None:
+        """Přidá zadaný objekt do kontejneru.
         """
         self._items.append(item)
         self._item_names.append(item.name.lower())
-        return True
 
-
-    def remove_item(self, item_name:str) -> Item:
+    def remove_item(self, item_name:str) -> bool:
         """Pokusí se odebrat objekt se zadaným názvem z kontejneru
-        a pokud se to podari, tak vrati objekt, jinak vrati None.
+        a pokud se to podaří, tak vrátí objekt, jinak vrátí None.
         """
         name = item_name.lower()
         if name in self._item_names:
-            index = self._item_names.index(name)
-            self._item_names.pop(index)
-            result = self._items.pop(index)
+            index  = self._item_names.index(name)
+            name   = self._item_names.pop(index)
+            result = self._items     .pop(index)
             return result
         return None
-
-
 
 ############################################################################
 
@@ -151,24 +187,18 @@ class _Bag(ItemContainer):
     """Instance představuje úložiště,
     do nějž hráči ukládají objekty sebrané v jednotlivých prostorech,
     aby je mohli přenést do jiných prostorů a/nebo použít.
-    Úložiště má konečnou kapacitu definující maximální povolený
-    součet vah objektů vyskytujících se v úložišti.
+    Úložiště má konečnou kapacitu definující počet objektů.
     """
 
-    CAPACITY = 2    # Maximální kapacita batohu
-
+    CAPACITY = 3    # Maximální kapacita batohu
 
     def __init__(self, initial_item_names:tuple[str], **args):
         super().__init__(initial_item_names=initial_item_names, **args)
 
-
-    def initialize(self):
-        """Inicializuje batoh na počátku hry. Vedle inicializace obsahu
-        inicializuje i informaci o zbývající kapacitě.
+    def initialize(self) -> None:
+        """Inicializuje batoh na počátku hry.
         """
         super().initialize()
-        self.CAPACITY = 3
-
 
     @property
     def capacity(self) -> int:
@@ -177,18 +207,11 @@ class _Bag(ItemContainer):
         return self.CAPACITY
     
     @property
-    def items(self) -> list[Item]:
-        return [item(i) for i in self._initial_item_names]
-
-    @items.setter
-    def items(self, value) -> None:
-        self._items = value
-    
-    @property
     def free(self) -> int:
+        """Vrátí volnou kapacitu batohu.
+        """
         return self.CAPACITY - len(self._items)
     
-
 ############################################################################
 
 class Place(ItemContainer, Named):
@@ -204,29 +227,28 @@ class Place(ItemContainer, Named):
 
     def __init__(self, name:str, description:str,
                  initial_neighbor_names:tuple[str],
-                 initial_item_names    :tuple[str], **args
+                 initial_item_names    :tuple[str], 
+                 will_kill:bool, **args
         ):
         super().__init__(name=name, initial_item_names=initial_item_names,
                          **args)
         self._description = description
-        self.initial_neighbor_names = [n.lower() for
+        self._initial_neighbor_names = [n.lower() for
                                        n in initial_neighbor_names]
+        self._will_kill = will_kill
 
-    def initialize(self):
+    def initialize(self) -> None:
         """Inicializuje prostor na počátku hry,
-        tj. nastaví počáteční sadu sousedů a objektů v prostoru.
+        tj. nastaví počáteční sadu sousedů v prostoru.
         """
         super().initialize()
-        self._neighbors = [place(n) for n in self.initial_neighbor_names]
-        self._items = [item(i) for i in self._initial_item_names]
-
+        self._neighbors = [place(n) for n in self._initial_neighbor_names]
 
     @property
     def description(self) -> str:
         """Vrátí stručný popis daného prostoru.
         """
         return self._description
-
 
     @property
     def neighbors(self) -> tuple[APlace]:
@@ -236,57 +258,46 @@ class Place(ItemContainer, Named):
         """
         return tuple(self._neighbors)
     
-    @neighbors.setter
-    def neighbors(self, value):
-        self._neighbors = value
-
-    
     @property
-    def items(self) -> list[Item]:
-        return self._items
-    
-    @items.setter
-    def items(self, value):
-        self._items = value
-
+    def will_kill(self) -> bool:
+        """Vrátí informaci o tom, zda hráč zemře, když do prostoru vstoupí.
+        """
+        return self._will_kill
 
 ############################################################################
 
-def initialize():
+def initialize() -> None:
     """Inicializuje svět hry, tj. nastavuje vzájemné počáteční
         propojení jednotlivých prostorů a jejich výchozí obsah,
         nastaví výchozí aktuální prostor a inicializuje batoh.
     """
     global _current_place
     
-    # inicializuj vsechny predmety
+    # inicializuj všechny předměty
     for item in _ITEMS:
         item.initialize()
 
-    # inicializuj vsechny prostory
+    # inicializuj všechny prostory
     for place in _PLACES:
         place.initialize()
 
-    # nastav aktualni prvni prostor
+    # nastav aktuální první prostor
     _current_place = _PLACES[0]
 
     # inicializuj batoh
     BAG.initialize()
     
-
 def current_place() -> Place:
     """Vrátí odkaz na aktuální prostor,
     tj. na prostor, v němž se hráč pravé nachází.
     """
     return _current_place
 
-
 def places() -> tuple[Place]:
     """Vrátí n-tici odkazů na všechny prostory ve hře
     včetně těch aktuálně nedosažitelných či neaktivních.
     """
     return _PLACES
-
 
 def place(name:str) -> Place:
     """Vrátí prostor se zadaným názvem. Pokud ve hře takový není,
@@ -295,81 +306,148 @@ def place(name:str) -> Place:
     return _NAME_2_PLACE.get(name)
 
 def item(name:str) -> Item:
+    """Vrátí předmět se zadaným názvem. Pokud ve hře takový není,
+    vrátí None.
+    """
     return _NAME_2_ITEM.get(name)
-
 
 ############################################################################
 
+#n-tice všech předmětů ve hře
 _ITEMS = (
-    Item('helikoptera', 
-    False,
-    'Nasli jste tyto veci: mobil, mapu, flash disk a naradi.',
-    ('mobil', 'mapa', 'flash_disk','naradi',)),
+    Item('helikoptera',                                         #nazev
+        False,                                                  #je zvednutelny
+        'Našli jste tyto věci: mobil, mapu, flash_disk a naradi.',
+        ('mobil', 'mapa', 'flash_disk','naradi',),              #odhali veci
+        (),                                                     #pouzit na
+        '',                                                     #text po pouziti
+        False                                                   #ukonci hru?
+    ),
     Item('mobil', 
-    True,
-    'Telefon je bohuzel rozbity a tak je k nicemu.',
-    ()),
-    Item('kompas',True,
-    'Funkcni kompas.',
-    ()),
-    Item('mapa',True,
-    'Na mape vidite nacrtnutou lebku v lese a majak. Zbytek mapy je ohorely.',
-    ()),
-    Item('flash_disk',True,
-    'Obycejna flashka. Jeji obsah bohuzel nejste schopni zjistit.',
-    ()),
-    Item('naradi',False,
-    'Naradi je zaklineno pod troskami helikoptery.',
-    ()),
+        True,
+        'Telefon je bohužel rozbitý a tak je k ničemu.',
+        (), 
+        (),
+        '',
+        False
+    ),
+    Item('kompas',
+        True,
+        'Funkční kompas.',
+        (), 
+        ('mapa',),
+        '',
+        False
+    ),
+    Item('mapa',
+        True,
+        'Na mapě vidíte načrtnutou lebku v lese a maják. '
+        'Zbytek mapy je ohořelý.',
+        (),
+        (),
+        'Díky kompasu jste zjistili, kde jsou světové strany.',
+        False
+    ),
+    Item('flash_disk', 
+        True,
+        'Obyčejná flashka. Její obsah bohužel nejste schopni zjistit.',
+        (),
+        ('pocitace',),
+        '',
+        True
+    ),
+    Item('naradi', 
+        False,
+        'Nářadí je zaklíněno pod troskami helikoptéry.',
+        (),
+        (),
+        '',
+        False
+    ),
+    Item('pocitace', 
+        False,
+        'Počítač vyžaduje zadání přístupových údajů.',
+        (),
+        (),
+        'Použili jste: flash_disk na: pocitace.\n'
+        'Flash disk jste připojili k počítači.\n'
+        '...\n'
+        'Úspěšně jste se díky obsahu na flashce dostali do počítačů...\n'
+          'Nyní si můžete zavolat pomoc a budete zachráněni...'
+          'Gratuluji, vyhráli jste!',
+        False
+    ),
+    Item('dvere', 
+        False,
+        'Dveře jsou bohužel zamčené a nejdou otevřít.',
+        (),
+        (),
+        '',
+        False
+    ),
 )
 
+#slovník názvů předmětů a jejich objektů
 _NAME_2_ITEM = {n.name.lower():n for n in _ITEMS}
 
-
+#všechny prostory nacházející se ve hře
 _PLACES = (
     Place('pole',
           'Zde jste se probudili... Vedou odtud 4 cesty.',
           ('skaly', 'majak', 'jih', 'kopec',),
-          ()
+          (),
+          False
          ),
     Place('skaly',
-          'U vysokych skal se nachazi hluboky temny les.\n'
-          'Od lesa vychazi hruzostrasne vyti vlku...',
+          'U vysokých skal se nachází hluboký temný les.\n'
+          'Od lesa vychází hrůzostrašné vytí vlků...',
           ('pole', 'les',),
-          ()
+          (),
+          False
          ),
     Place('les',
-          'Priblizujete se k lesu a slysite cim dal silnejsi vyti vlku.',
+          'Přibližujete se k lesu a slyšíte čím dál silnější vytí vlků.\n...'
+          '\n...\nVykot se rázem změnil v agresivní chrčení.\n...\n... \n'
+          'Snažíte se zachránit útěkem před smečkou hladových vlků.\n...\n...'
+          '\nBohužel vlci vás dohnali a sežrali.',
           ('skaly',),
-          ()
+          (),
+          True
          ),
     Place('kopec',
-          'Na kopci jste objevili horici vrak helikoptery.',
+          'Na kopci jste objevili hořící vrak helikoptéry.',
           ('pole',),
-          ('helikoptera', )
+          ('helikoptera', ),
+          False
          ),
     Place('jih',
-          'Nikde nic nablizku. Zadne znamky zachrany...',
+          'Nikde nic nablízku. Žádné známky záchrany...',
           ('mlha','pole',),
-          ()
+          (),
+          False
          ),
     Place('mlha',
-          'Zacina vam byt zima a v dohlednu se nic neobjevuje.',
+          '\Začíná vám být zima a v dohlednu se nic neobjevuje.\n...\n...\n'
+          'Příšerná zima.\n...\n... \nBohužel jste umrzli zimou.',
           ('jih',),
-          ()
+          (),
+          True
          ),
     Place('majak',
-          'U majaku se nachazi velka hala.',
+          'U majáku se nachází velká hala.',
           ('pole', 'hala'),
-          ('dvere')
+          ('dvere',),
+          False
          ),
     Place('hala',
-          'V hale jste nasli mimo jine velke pocitacove centrum.',
-          ('majak'),
-          ('pocitace')
+          'V hale jste našli mimo jiné velké počítačové centrum.',
+          ('majak',),
+          ('pocitace',),
+          False
          ),
 )
 
+#slovník názvů prostorů a jejich objektů
 _NAME_2_PLACE = {n.name.lower():n for n in _PLACES}
 
 

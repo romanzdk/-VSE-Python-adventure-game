@@ -1,6 +1,6 @@
 #Příliš žluťoučký kůň úpěl ďábelské ó - PŘÍLIŠ ŽLUŤOUČKÝ KŮŇ ÚPĚL ĎÁBELSKÉ Ó
 """
-Základní trojice scénářů pro hru o snehovem pekle.
+Základní trojice scénářů pro hru o sněhovém pekle.
 """
 import dbg
 dbg.start_mod(0, __name__)
@@ -29,32 +29,32 @@ HAPPY = Scenario('', stHAPPY, (
           ('kompas',),           # H-Objekty v batohu
           ),
     ScenarioStep(tsNS_0, 'zakric',           # Zadaný příkaz
-          'Kricite o pomoc...\nPorad kricite...\nUz nemuzete...\n'
-          'Nikdo se neozyva...\nKrik vzdavate.',
+          'Křičíte o pomoc...\Pořád křičíte...\nUž nemůžete...\n'
+          'Nikdo se neozývá...\nKřik vzdáváte.',
           'pole',    # Aktuální prostor
           ('majak','skaly', 'kopec', 'jih',),     # Aktuální sousedé
           (), # H-objekty v prostoru
           ('kompas',),           # H-Objekty v batohu
           ),
       ScenarioStep(tsNS_0, 'brec',           # Zadaný příkaz
-          'Brecite zoufalstvim...\nPorad brecite...\nUz vas to nebavi...\n'
-          'Vzchopite se a jdete neco delat.',
+          'Brečíte zoufalstvím...\nPořád brečíte...\nUž vás to nebaví...\n'
+          'Vzchopíte se a jdete něco dělat.',
           'pole',    # Aktuální prostor
           ('majak','skaly', 'kopec', 'jih',),     # Aktuální sousedé
           (), # H-objekty v prostoru
           ('kompas',),           # H-Objekty v batohu
           ),
       ScenarioStep(tsGOTO, 'jdi skaly', # Zadaný příkaz
-          'Presunuli jste se do prostoru: skaly.\n'
-          'U vysokych skal se nachazi hluboky temny les.\n'
-          'Od lesa vychazi hruzostrasne vyti vlku...',
+          'Přesunuli jste se do prostoru: skaly.\n'
+          'U vysokých skal se nachází hluboký temný les.\n'
+          'Od lesa vychází hrůzostrašné vytí vlků...',
           'skaly',    # Aktuální prostor
           ('les', 'pole', ),    # Aktuální sousedé
           (), # H-objekty v prostoru
           ('kompas', ),   # H-Objekty v batohu
           ),
       ScenarioStep(tsGOTO, 'jdi pole',
-          'Presunuli jste se do prostoru: pole.\n'
+          'Přesunuli jste se do prostoru: pole.\n'
           'Zde jste se probudili... Vedou odtud 4 cesty.',
           'pole',
           ('majak','skaly', 'kopec', 'jih',),     # Aktuální sousedé
@@ -62,8 +62,8 @@ HAPPY = Scenario('', stHAPPY, (
           ('kompas', ),
           ),
     ScenarioStep(tsGOTO, 'jdi kopec', # Zadaný příkaz
-          'Presunuli jste se do prostoru: kopec.\n'
-          'Na kopci jste objevili horici vrak helikoptery.',
+          'Přesunuli jste se do prostoru: kopec.\n'
+          'Na kopci jste objevili hořící vrak helikoptéry.',
           'kopec',    # Aktuální prostor
           ('pole', ),    # Aktuální sousedé
           ('helikoptera',), # H-objekty v prostoru
@@ -71,7 +71,7 @@ HAPPY = Scenario('', stHAPPY, (
           ),
     ScenarioStep(tsNS_1, 'prozkoumej helikoptera',
           'Prozkoumali jste: helikoptera.\n'
-          'Nasli jste tyto veci: mobil, mapu, flash disk a naradi.',
+          'Našli jste tyto věci: mobil, mapu, flash_disk a naradi.',
           'kopec',
           ('pole',),
           ('mobil', 'flash_disk', 'mapa', 'naradi', 'helikoptera'),
@@ -79,7 +79,7 @@ HAPPY = Scenario('', stHAPPY, (
           ),
     ScenarioStep(tsTAKE, 'vezmi flash_disk',
           'Sebrali jste: flash_disk.\n'
-          'Obycejna flashka. Jeji obsah bohuzel nejste schopni zjistit.',
+          'Obyčejná flashka. Její obsah bohužel nejste schopni zjistit.',
           'kopec',
           ('pole',),
           ('mobil', 'mapa', 'naradi', 'helikoptera'),
@@ -87,7 +87,7 @@ HAPPY = Scenario('', stHAPPY, (
           ),
       ScenarioStep(tsTAKE, 'vezmi mobil',
           'Sebrali jste: mobil.\n'
-          'Telefon je bohuzel rozbity a tak je k nicemu.',
+          'Telefon je bohužel rozbitý a tak je k ničemu.',
           'kopec',
           ('pole',),
           ('mapa', 'naradi', 'helikoptera'),
@@ -101,7 +101,7 @@ HAPPY = Scenario('', stHAPPY, (
           ('kompas', 'flash_disk'),
           ),
     ScenarioStep(tsGOTO, 'jdi pole',
-          'Presunuli jste se do prostoru: pole.\n'
+          'Přesunuli jste se do prostoru: pole.\n'
           'Zde jste se probudili... Vedou odtud 4 cesty.',
           'pole',
           ('majak','skaly', 'kopec', 'jih',),     # Aktuální sousedé
@@ -109,28 +109,28 @@ HAPPY = Scenario('', stHAPPY, (
           ('kompas', 'flash_disk', ),
           ),
     ScenarioStep(tsGOTO, 'jdi majak',
-          'Presunuli jste se do prostoru: majak.\n'
-          'Prisli jste ke dverim majaku. U majaku se nachazi velka hala.',
+          'Přesunuli jste se do prostoru: majak.\n'
+          'U majáku se nachází velká hala.',
           'majak',
           ('hala', 'pole', ),
           ('dvere', ),
           ('kompas', 'flash_disk', ),
           ),
     ScenarioStep(tsGOTO, 'jdi hala',
-          'Presunuli jste se do prostoru: hala.\n'
-          'V hale jste nasli mimo jine velke pocitacove centrum.',
+          'Přesunuli jste se do prostoru: hala.\n'
+          'V hale jste našli mimo jiné velké počítačové centrum.',
           'hala',
           ('majak',),
           ('pocitace', ),
           ('kompas', 'flash_disk', ),
           ),
     ScenarioStep(tsNS_2, 'pouzij flash_disk pocitace',
-          'Pouzili jste: flash disk na: pocitace.\n'
-          'Flash disk jste pripojili k pocitaci.\n'
+          'Použili jste: flash_disk na: pocitace.\n'
+          'Flash disk jste připojili k počítači.\n'
           '...\n'
-          'Uspesne jste se diky obsahu na flashce dostali do pocitacu...\n'
-          'Nyni si muzete zavolat pomoc a budete zachraneni...'
-          'Gratuluji, vyhrali jste!',
+          'Úspěšně jste se díky obsahu na flashce dostali do počítačů...\n'
+          'Nyní si můžete zavolat pomoc a budete zachráněni...'
+          'Gratuluji, vyhráli jste!',
           'hala',
           ('majak',),
           ('pocitace', 'flash_disk' ),
@@ -188,7 +188,7 @@ MISTAKE = Scenario('', stMISTAKES, (
         ),
 
     ScenarioStep(tsTAKE_WA, "vezmi",                # Zadaný příkaz
-        'Nevím, co mám zvednout.\n'
+        'Nevím, co mám vzít.\n'
         'Je třeba zadat jméno zvedaného objektu.',
         'pole',                                     # Aktuální prostor
         ('majak','skaly', 'kopec', 'jih',),         # Aktuální sousedé
@@ -222,8 +222,8 @@ MISTAKE = Scenario('', stMISTAKES, (
         ),
 
     ScenarioStep(tsGOTO, 'jdi kopec',               # Zadaný příkaz
-          'Presunuli jste se do prostoru: kopec.\n'
-          'Na kopci jste objevili horici vrak helikoptery.',
+          'Přesunuli jste se do prostoru: kopec.\n'
+          'Na kopci jste objevili hořící vrak helikoptéry.',
           'kopec',                                  # Aktuální prostor
           ('pole', ),                               # Aktuální sousedé
           ('helikoptera',),                         # H-objekty v prostoru
@@ -240,7 +240,7 @@ MISTAKE = Scenario('', stMISTAKES, (
     
     ScenarioStep(tsNS_1, 'prozkoumej helikoptera',
           'Prozkoumali jste: helikoptera.\n'
-          'Nasli jste tyto veci: mobil, mapu, flash disk a naradi.',
+          'Našli jste tyto věci: mobil, mapu, flash_disk a naradi.',
           'kopec',
           ('pole',),
           ('mobil', 'flash_disk', 'mapa', 'naradi', 'helikoptera'),
@@ -249,7 +249,7 @@ MISTAKE = Scenario('', stMISTAKES, (
 
     ScenarioStep(tsTAKE, 'vezmi flash_disk',
           'Sebrali jste: flash_disk.\n'
-          'Obycejna flashka. Jeji obsah bohuzel nejste schopni zjistit.',
+          'Obyčejná flashka. Její obsah bohužel nejste schopni zjistit.',
           'kopec',
           ('pole',),
           ('mobil', 'mapa', 'naradi', 'helikoptera'),
@@ -258,7 +258,7 @@ MISTAKE = Scenario('', stMISTAKES, (
     
     ScenarioStep(tsTAKE, 'vezmi mobil',
           'Sebrali jste: mobil.\n'
-          'Telefon je bohuzel rozbity a tak je k nicemu.',
+          'Telefon je bohužel rozbitý a tak je k ničemu.',
           'kopec',
           ('pole',),
           ('mapa', 'naradi', 'helikoptera'),
@@ -282,13 +282,13 @@ MISTAKE = Scenario('', stMISTAKES, (
         ),
 
     ScenarioStep(tsHELP, '?',                       # Zadaný příkaz
-        'Tvým úkolem je zachránit se - dostat se z tohoto místa\n'
-        'Můžeš zadat tyto příkazy:\n'
-        'jdi <misto>\n'
-        'vezmi <predmet>\n'
-        'poloz <predmet>\n'
-        'prozkoumej <predmet>\n'
-        'pouzij <predmet1> <predmet2>\n'
+        'Vaším úkolem je zachránit se - dostat se z tohoto místa\n'
+        'Můžete zadat tyto příkazy:\n'
+        'jdi <místo>\n'
+        'vezmi <předmět>\n'
+        'poloz <předmět>\n'
+        'prozkoumej <předmět>\n'
+        'pouzij <předmět1> <předmět2>\n'
         'zakric\n'
         'brec\n'
         'konec\n'
@@ -325,8 +325,8 @@ MISTAKE_NS = Scenario('', stMISTAKES_NS, (
         HAPPY.steps[6],   # prozkoumej helikoptera
 
     ScenarioStep(tsNS0_WrongCond, 'zakric',
-        'Uz jsi jednou kricel, pokud by jsi zakricel znovu,\n'
-        'tak by ti dosly vsechny sily a jiste by jsi umrzl.',
+        'Už jste jednou křičeli, pokud byste křičeli znovu,\n'
+        'tak by vám došly všechny síly a jistě byste umrzli.',
         'kopec',
         ('pole',),
         ('mobil', 'flash_disk', 'mapa', 'naradi', 'helikoptera'),
@@ -334,8 +334,8 @@ MISTAKE_NS = Scenario('', stMISTAKES_NS, (
     ),
 
     ScenarioStep(tsNS0_WrongCond, 'brec',
-        'Uz jsi jednou brecel, pokud by jsi brecel znovu,\n'
-        'tak by ti dosly vsechny sily a jiste by jsi umrzl.',
+        'Už jste jednou brečeli, pokud byste brečeli znovu,\n'
+        'tak by vám došly všechny síly a jistě byste umrzli.',
         'kopec',
         ('pole',),
         ('mobil', 'flash_disk', 'mapa', 'naradi', 'helikoptera'),
@@ -343,29 +343,29 @@ MISTAKE_NS = Scenario('', stMISTAKES_NS, (
     ),
 
     ScenarioStep(tsNS1_WrongCond, 'prozkoumej helikoptera',
-        'Predmet helikoptera jsi jiz jednou prozkoumal, nelze stejny\n'
-        'predmet prozkoumavat znovu.',
+        'Předmět helikoptera jste již jednou prozkoumali, nelze stejný\n'
+        'předmět prozkoumávat znovu.',
         'kopec',
         ('pole',),
         ('mobil', 'flash_disk', 'mapa', 'naradi', 'helikoptera'),
         ('kompas',),
     ),
     ScenarioStep(tsNS1_WRONG_ARG, 'prozkoumej sekera',
-        'Predmet sekera nelze prozkoumat, jelikoz se zde nenachazi',
+        'Zadaný objekt v prostoru není: sekera.',
         'kopec',
         ('pole',),
         ('mobil', 'flash_disk', 'mapa', 'naradi', 'helikoptera'),
         ('kompas',),
     ),
     ScenarioStep(tsNS1_0Args, 'prozkoumej',
-        'Nevim co mam prozkoumat, zadejte argument.',
+        'Nevím co mám prozkoumat, zadejte argument.',
         'kopec',
         ('pole',),
         ('mobil', 'flash_disk', 'mapa', 'naradi', 'helikoptera'),
         ('kompas',),
     ),
     ScenarioStep(tsNS2_WRONG_1stARG, 'pouzij helikoptera mobil',
-        'Nelze pouzit neprenosny predmet: helikoptera',
+        'Nelze použít nepřenosný předmět: helikoptera.',
         'kopec',
         ('pole',),
         ('mobil', 'flash_disk', 'mapa', 'naradi', 'helikoptera'),
@@ -373,43 +373,35 @@ MISTAKE_NS = Scenario('', stMISTAKES_NS, (
     ),
 
     ScenarioStep(tsNS2_1Args, 'pouzij kompas',
-        'Nevim na co mam zadany predmet pouzit. Zadejte druhy predmet.',
+        'Nevím na co mám zadaný předmět použít. Zadejte druhý předmět.',
         'kopec',
         ('pole',),
         ('mobil', 'flash_disk', 'mapa', 'naradi', 'helikoptera'),
         ('kompas',),
     ),
 
-    ScenarioStep(tsNS2_WRONG_2ndARG, 'pouzij kompas mobil',
-        'Nelze pouzit predmet: kompas na predmet: mobil',
+    ScenarioStep(tsNS2_WRONG_2ndARG, 'pouzij mobil nabijecka',
+        'Nelze použít předmět: mobil na předmět: nabijecka, který ve hře není.',
         'kopec',
         ('pole',),
         ('mobil', 'flash_disk', 'mapa', 'naradi', 'helikoptera'),
         ('kompas',),
     ),
 
-    ScenarioStep(tsPUT_DOWN, 'poloz kompas',
-        'Vyhodili jste: kompas.',
+    ScenarioStep(tsNS2_WrongCond, 'pouzij kompas mobil',
+        'Nelze použít předmět: kompas na předmět: mobil.',
         'kopec',
         ('pole',),
-        ('mobil', 'flash_disk', 'mapa', 'naradi', 'helikoptera', 'kompas'),
-        (),
-    ),
-
-    ScenarioStep(tsNS2_WrongCond, 'pouzij kompas mapa',
-        'Nelze pouzit predmet: kompas, ktery nemas v batohu',
-        'kopec',
-        ('pole',),
-        ('mobil', 'flash_disk', 'mapa', 'naradi', 'helikoptera', 'kompas'),
-        (),
+        ('mobil', 'flash_disk', 'mapa', 'naradi', 'helikoptera',),
+        ('kompas',),
     ),
     ScenarioStep(tsEND, 'konec',                    # Zadaný příkaz
         'Ukončili jste hru.\n'
         'Děkujeme, že jste si zahráli.',
         'kopec',
         ('pole',),
-        ('mapa', 'naradi', 'helikoptera'),
-        ('kompas', 'flash_disk', 'mobil'),
+        ('mapa', 'naradi', 'helikoptera', 'flash_disk', 'mobil'),
+        ('kompas', ),
         ),
     )
 )
@@ -422,8 +414,8 @@ START = Scenario('START', stGENERAL, (
     START_STEP,
 
     ScenarioStep(tsGOTO, 'jdi kopec',                           # Zadaný příkaz
-          'Presunuli jste se do prostoru: kopec.\n'
-          'Na kopci jste objevili horici vrak helikoptery.',
+          'Přesunuli jste se do prostoru: kopec.\n'
+          'Na kopci jste objevili hořící vrak helikoptéry.',
           'kopec',                                           # Aktuální prostor
           ('pole', ),                                        # Aktuální sousedé
           ('helikoptera',),                             # H-objekty v prostoru
@@ -438,7 +430,7 @@ START = Scenario('START', stGENERAL, (
     ),
     ScenarioStep(tsTAKE, 'vezmi kompas',
           'Sebrali jste: kompas.\n'
-          'Funkcni kompas.',
+          'Funkční kompas.',
           'kopec',
           ('pole',),
           ('helikoptera',),

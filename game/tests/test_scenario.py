@@ -41,12 +41,22 @@ def test_scenarios_from(factory:AFactory, level:int) -> str:
     else:
         # Připraví n-tici scénářů, které se budou testovat
         happy = factory.scenarios()[0]
-        _scenarios = tuple(factory.scenarios()[:level+1])
+        # Je-li hladina alespoň 3, testují se všechny scénáře
+        if level < 3:
+            _scenarios = tuple(factory.scenarios()[:level+1])
+        else:
+            if len(factory.scenarios()) < 4:
+                msg = 'Aplikace nenabízí 4 povinné scénáře!'
+                print(f'\n{60*"@"}\n{msg}')
+                raise(msg)
+            _scenarios = tuple(factory.scenarios())
 
     _initialize_for_all()
     results = [(scenario.name + ' - ' + str(_test_scenario(scenario)))
                for scenario in _scenarios]
     msg = '\n'.join(results)
+    global BASIC_ACTIONS
+    BASIC_ACTIONS = _derive_basic_actions()
     print(f'{N_EXCLAM_N}Testy scénářů dopadly následovně:\n{msg}')
     return results
 
@@ -186,8 +196,8 @@ def _initialize_for_all() -> None:
     global _all_seen_items;         _all_seen_items         = set()
     global _entered_ns_actions;     _entered_ns_actions     = set()
 
-    global _action_2_group;            _action_2_group      = {}
-    global _group_2_action;            _group_2_action      = {}
+    global _action_2_group;         _action_2_group         = {}
+    global _group_2_action;         _group_2_action         = {}
 
     global _happy_tested;           _happy_tested           = False
     # global _scenarios             = Již inicializované
@@ -195,15 +205,16 @@ def _initialize_for_all() -> None:
 
 
 def _derive_basic_actions():
-    """Odvodí z hodnot uložených ve slovníku {@link #type2name} odvodí
-    názvy povinných akcí"""
+    """Z hodnot uložených ve slovníku odvodí názvy povinných akcí.
+    """
     move = _group_2_action.get(tsGOTO, "NEPŘIŘAZENO")
     take = _group_2_action.get(tsTAKE, "NEPŘIŘAZENO")
     put  = _group_2_action.get(tsPUT_DOWN, "NEPŘIŘAZENO")
     help = _group_2_action.get(tsHELP, "NEPŘIŘAZENO")
     end  = _group_2_action.get(tsEND, "NEPŘIŘAZENO")
 
-    result = BasicActions(move, take, put, help, end)
+    result = BasicActions(MOVE_NAME=move, PUT_DOWN_NAME=put,
+                          TAKE_NAME=take, HELP_NAME=help, END_NAME=end)
     return result
 
 
@@ -991,6 +1002,10 @@ _visited_places:set[str]                # Názvy navštívených prostorů
 _seen_items:set[str]                    # Názvy zahlédnutých h-objektů
 
 
+
+############################################################################
+
+BASIC_ACTIONS:BasicActions = None
 
 
 ############################################################################

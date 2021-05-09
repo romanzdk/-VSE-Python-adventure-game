@@ -70,7 +70,7 @@ def pre_import():
     Scenario.count = 0
 
 
-def test(factory: AFactory, level:Level, ) -> bool:
+def test(factory: AFactory, level:Level, scen_lst:list[int]=[3]) -> bool:
     """Otestuje zadaný tovární objekt do zadané hloubky.
     Ověří, že zadaná továrna poskytne podklady pro identifikaci autora,
     poskytuje počet scénářů požadovaných argumentem level
@@ -106,7 +106,11 @@ def test(factory: AFactory, level:Level, ) -> bool:
             # Bude se testovat hra
             # from .test_game import test_game_from
             # test_game_from(factory, level)
-            factory.scenarios()[3].test(factory.game())
+            # factory.scenarios()[3].test(factory.game())
+            g  = factory.game()
+            ss = factory.scenarios()
+            for i in scen_lst:
+                ss[i].test(g)
     except Exception as ex:
         result = f'Výjimka: {ex}'
         traceback.print_exc()

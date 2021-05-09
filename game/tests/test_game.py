@@ -12,8 +12,8 @@ from ..api.game_types   import AFactory, BasicActions
 
 ############################################################################
 
-def test_game_from(factory:AFactory, level:int) -> None:
-    """Test hry v požadované hladině podrobností.
+def test_game_from(factory:AFactory, scenarios:list[int]) -> None:
+    """Test hry podle zadaných scénářů
     """
 
 
